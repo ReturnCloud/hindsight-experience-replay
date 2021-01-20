@@ -9,6 +9,7 @@ class her_sampler:
         else:
             self.future_p = 0
         self.reward_func = reward_func
+        self.is_her = is_her
 
     def sample_her_transitions(self, episode_batch, batch_size_in_transitions):
         T = episode_batch['actions'].shape[1]

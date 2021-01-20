@@ -82,7 +82,9 @@ class ddpg_agent:
                         with torch.no_grad():
                             input_tensor = self._preproc_inputs(obs, g)
                             pi = self.actor_network(input_tensor)
-                            action = self._select_actions(pi)
+                            action = self.new_select(pi)
+
+                            # action = self._select_actions(pi)
                         # feed the actions into the environment
                         observation_new, r, d, info = self.env.step(action)
                         # if d:
@@ -113,7 +115,7 @@ class ddpg_agent:
                 mb_actions = np.array(mb_actions)
                 # store the episodes
                 self.buffer.store_episode([mb_obs, mb_ag, mb_g, mb_actions])
-                self._update_normalizer([mb_obs, mb_ag, mb_g, mb_actions])
+                # self._update_normalizer([mb_obs, mb_ag, mb_g, mb_actions])
                 for _ in range(self.args.n_batches):
                     # train the network
                     loss_p, loss_q, q_val = self.update_network()
@@ -149,6 +151,10 @@ class ddpg_agent:
         return inputs
 
     # this function will choose action for the agent and do the exploration
+    def new_select(self, pi, noise_scale=0.05):
+        a = np.array(pi)
+        a += noise_scale * np.random.randn(self.env_params['action'])
+        return np.clip(a, -self.env_params['action_max'], self.env_params['action_max'])[0]
     def _select_actions(self, pi):
         action = pi.cpu().numpy().squeeze()
         # add the gaussian
