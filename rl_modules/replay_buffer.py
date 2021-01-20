@@ -22,7 +22,7 @@ class replay_buffer:
                         }
         # thread lock
         self.lock = threading.Lock()
-    
+
     # store the episode
     def store_episode(self, episode_batch):
         mb_obs, mb_ag, mb_g, mb_actions = episode_batch
@@ -35,7 +35,7 @@ class replay_buffer:
             self.buffers['g'][idxs] = mb_g
             self.buffers['actions'][idxs] = mb_actions
             self.n_transitions_stored += self.T * batch_size
-    
+
     # sample the data from the replay buffer
     def sample(self, batch_size):
         temp_buffers = {}

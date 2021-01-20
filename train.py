@@ -6,6 +6,24 @@ from mpi4py import MPI
 from rl_modules.ddpg_agent import ddpg_agent
 import random
 import torch
+from torch.utils.tensorboard import SummaryWriter
+import os
+import shutil
+
+
+def mk_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def rm_dir(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
+def reset_dir(path):
+    rm_dir(path)
+    mk_dir(path)
 
 """
 train the agent, the MPI part code is copy from openai baselines(https://github.com/openai/baselines/blob/master/baselines/her)
@@ -34,8 +52,11 @@ def launch(args):
         torch.cuda.manual_seed(args.seed + MPI.COMM_WORLD.Get_rank())
     # get the environment parameters
     env_params = get_env_params(env)
-    # create the ddpg agent to interact with the environment 
-    ddpg_trainer = ddpg_agent(args, env, env_params)
+    # create the ddpg agent to interact with the environment
+    reset_dir('./experiments/log')
+    tb_wrt = SummaryWriter('./experiments/log')
+
+    ddpg_trainer = ddpg_agent(args, env, env_params, tb_wrt, is_her=args.is_her)
     ddpg_trainer.learn()
 
 if __name__ == '__main__':
